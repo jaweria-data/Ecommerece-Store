@@ -10,6 +10,7 @@ headers = {
 
 print("Live data is fetching from Daraz.pk...")
 response = requests.get(url, headers=headers)
+response.raw
 data = response.json()
 products = data['mods']['listItems']
 
@@ -28,7 +29,7 @@ conn_str = (
 conn = pyodbc.connect(conn_str)
 cursor = conn.cursor()
 
-print("Data table mein save ho raha hai...")
+print("Data is saving into the database...")
 
 # Testing ke liye pehle 5 products save kar rahe hain
 for item in products[:5]:
@@ -47,4 +48,4 @@ conn.commit()
 cursor.close()
 conn.close()
 
-print("Task 2 Complete! Data scucessfully save in the database.")
+print("Task 2 Complete! Data successfully save in the database.")

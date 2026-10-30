@@ -1,16 +1,23 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 import pandas as pd
-import pyodbc
+from sqlalchemy import create_engine
 from sklearn.ensemble import IsolationForest
 import warnings
-
+SQLALCHEMY_DATABASE_URL = "sqlite:///./ecommerce.db"
+engine = create_engine(SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False})
 # Suppress pandas SQL execution warnings
 warnings.filterwarnings('ignore')
 
-app = FastAPI(
-    title="E-commerce Inflation & Anomaly API",
-    description="RESTful API serving live price inflation metrics and ML-detected anomalies.",
-    version="1.0.0"
+app = FastAPI()
+
+# Browser ki CORS Blockage ko bypass karne ke liye
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Yeh sabhi sources ko permission dega
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 @app.get("/")
@@ -31,8 +38,8 @@ def get_anomalies():
     )
     conn = pyodbc.connect(conn_str)
     query = "SELECT * FROM daily_prices"
-    df = pd.read_sql(query, conn)
-    conn.close()
+    df = pd.read_sql(query, engine)
+   
 
     # 2. Time-Series Preprocessing & Inflation Logic (Pandas)
     df['fetch_date'] = pd.to_datetime(df['fetch_date'])
